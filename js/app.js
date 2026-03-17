@@ -1,5 +1,7 @@
 import { TENSES } from "../data/examples.js";
 
+const STORAGE_KEY = "english_tenses_trainer_state_v1";
+
 const tenseSelect = document.getElementById("tenseSelect");
 const modeSelect = document.getElementById("modeSelect");
 const checkModeSelect = document.getElementById("checkModeSelect");
@@ -17,8 +19,36 @@ const state = {
   attempts: 0,
   success: 0,
   failure: 0,
-  done: 0
+  done: 0,
+  tenseId: "",
+  mode: "choice",
+  checkMode: "strict",
+  tasks: []
 };
+
+function saveState() {
+  const payload = {
+    attempts: state.attempts,
+    success: state.success,
+    failure: state.failure,
+    done: state.done,
+    tenseId: state.tenseId,
+    mode: state.mode,
+    checkMode: state.checkMode,
+    tasks: state.tasks
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
 
 function normalizeText(text) {
   return text
@@ -133,7 +163,15 @@ function buildThirty(seedItems, mode) {
   const arr = [];
   for (let i = 0; i < 30; i += 1) {
     const item = seedItems[i % seedItems.length];
-    arr.push({ ...item, idx: i + 1, mode });
+    arr.push({
+      ...item,
+      idx: i + 1,
+      mode,
+      userAnswer: "",
+      checked: false,
+      ok: null,
+      feedbackText: ""
+    });
   }
   return arr;
 }
@@ -154,6 +192,14 @@ function resetStats() {
   state.failure = 0;
   state.done = 0;
   updateStats();
+}
+
+function recalcStatsFromTasks() {
+  const checkedTasks = state.tasks.filter((task) => task.checked);
+  state.done = checkedTasks.length;
+  state.attempts = checkedTasks.length;
+  state.success = checkedTasks.filter((task) => task.ok === true).length;
+  state.failure = checkedTasks.filter((task) => task.ok === false).length;
 }
 
 function renderTheory(tense) {
@@ -182,72 +228,112 @@ function translateMarkup(task) {
   `;
 }
 
-function renderTasks(tense) {
-  const mode = modeSelect.value;
-  const checkMode = checkModeSelect.value;
-  const seeds = mode === "choice" ? tense.choiceSeeds : tense.translateSeeds;
-  const tasks = buildThirty(seeds, mode);
+function renderTaskCard(task, index) {
+  const card = document.createElement("article");
+  card.className = "exercise";
 
-  intro.textContent = `Режим: ${mode === "choice" ? "Выбор ответа" : "Translate"}. Проверка: ${checkMode === "strict" ? "Строгая" : "По буквам"}.`;
+  card.innerHTML = `
+    <h3>Пример ${task.idx}</h3>
+    ${task.mode === "choice" ? choiceMarkup(task) : translateMarkup(task)}
+    <button type="button">Проверить</button>
+    <div class="feedback"></div>
+  `;
 
-  practiceContainer.innerHTML = "";
-  resetStats();
+  const button = card.querySelector("button");
+  const feedback = card.querySelector(".feedback");
+  const input = task.mode === "choice" ? card.querySelector("select") : card.querySelector("input");
 
-  tasks.forEach((task) => {
-    const card = document.createElement("article");
-    card.className = "exercise";
+  if (task.userAnswer) {
+    input.value = task.userAnswer;
+  }
 
-    card.innerHTML = `
-      <h3>Пример ${task.idx}</h3>
-      ${task.mode === "choice" ? choiceMarkup(task) : translateMarkup(task)}
-      <button type="button">Проверить</button>
-      <div class="feedback"></div>
-    `;
+  if (task.checked) {
+    button.disabled = true;
+    input.disabled = true;
+    feedback.textContent = task.feedbackText;
+    feedback.className = `feedback ${task.ok ? "good" : "bad"}`;
+  }
 
-    const button = card.querySelector("button");
-    const feedback = card.querySelector(".feedback");
-    const input = task.mode === "choice" ? card.querySelector("select") : card.querySelector("input");
-    let checked = false;
+  button.addEventListener("click", () => {
+    if (state.tasks[index].checked) return;
+    const value = (input.value || "").trim();
 
-    button.addEventListener("click", () => {
-      if (checked) return;
-      const value = (input.value || "").trim();
+    if (!value) {
+      feedback.textContent = "Сначала введите или выберите ответ.";
+      feedback.className = "feedback bad";
+      return;
+    }
 
-      if (!value) {
-        feedback.textContent = "Сначала введите или выберите ответ.";
-        feedback.className = "feedback bad";
-        return;
-      }
+    const result = checkAnswer(value, state.tasks[index].answer, state.checkMode);
+    const isOk = result.ok;
+    const text = isOk
+      ? `Хорошо. Ответ верный. ${result.details}`
+      : `Плохо. Правильно: ${state.tasks[index].answer}. ${result.details}`;
 
-      const result = checkAnswer(value, task.answer, checkMode);
+    state.tasks[index].userAnswer = value;
+    state.tasks[index].checked = true;
+    state.tasks[index].ok = isOk;
+    state.tasks[index].feedbackText = text;
 
-      state.attempts += 1;
-      state.done += 1;
-      checked = true;
-      button.disabled = true;
-      input.disabled = true;
+    button.disabled = true;
+    input.disabled = true;
 
-      if (result.ok) {
-        state.success += 1;
-        feedback.textContent = `Хорошо. Ответ верный. ${result.details}`;
-        feedback.className = "feedback good";
-      } else {
-        state.failure += 1;
-        feedback.textContent = `Плохо. Правильно: ${task.answer}. ${result.details}`;
-        feedback.className = "feedback bad";
-      }
+    feedback.textContent = text;
+    feedback.className = `feedback ${isOk ? "good" : "bad"}`;
 
-      updateStats();
-    });
-
-    practiceContainer.appendChild(card);
+    recalcStatsFromTasks();
+    updateStats();
+    saveState();
   });
+
+  return card;
 }
 
-function loadCurrent() {
+function renderTasks() {
+  intro.textContent = `Режим: ${state.mode === "choice" ? "Выбор ответа" : "Translate"}. Проверка: ${state.checkMode === "strict" ? "Строгая" : "По буквам"}.`;
+  practiceContainer.innerHTML = "";
+  state.tasks.forEach((task, index) => {
+    practiceContainer.appendChild(renderTaskCard(task, index));
+  });
+  recalcStatsFromTasks();
+  updateStats();
+}
+
+function startNewSession() {
   const selected = TENSES.find((item) => item.id === tenseSelect.value) ?? TENSES[0];
+
+  state.tenseId = selected.id;
+  state.mode = modeSelect.value;
+  state.checkMode = checkModeSelect.value;
+
+  const seeds = state.mode === "choice" ? selected.choiceSeeds : selected.translateSeeds;
+  state.tasks = buildThirty(seeds, state.mode);
+
   renderTheory(selected);
-  renderTasks(selected);
+  resetStats();
+  renderTasks();
+  saveState();
+}
+
+function restoreSession(saved) {
+  const selected = TENSES.find((item) => item.id === saved.tenseId) ?? TENSES[0];
+
+  state.tenseId = selected.id;
+  state.mode = saved.mode === "translate" ? "translate" : "choice";
+  state.checkMode = saved.checkMode === "letters" ? "letters" : "strict";
+
+  tenseSelect.value = state.tenseId;
+  modeSelect.value = state.mode;
+  checkModeSelect.value = state.checkMode;
+
+  const seeds = state.mode === "choice" ? selected.choiceSeeds : selected.translateSeeds;
+  const fallbackTasks = buildThirty(seeds, state.mode);
+  state.tasks = Array.isArray(saved.tasks) && saved.tasks.length === 30
+    ? saved.tasks.map((task, index) => ({ ...fallbackTasks[index], ...task }))
+    : fallbackTasks;
+
+  renderTheory(selected);
+  renderTasks();
 }
 
 function init() {
@@ -258,8 +344,17 @@ function init() {
     tenseSelect.appendChild(option);
   });
 
-  loadBtn.addEventListener("click", loadCurrent);
-  loadCurrent();
+  loadBtn.addEventListener("click", startNewSession);
+
+  const saved = loadSavedState();
+  if (saved && saved.tenseId) {
+    restoreSession(saved);
+  } else {
+    tenseSelect.value = TENSES[0].id;
+    modeSelect.value = "choice";
+    checkModeSelect.value = "strict";
+    startNewSession();
+  }
 }
 
 init();
