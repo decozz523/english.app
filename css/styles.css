@@ -1,0 +1,124 @@
+:root {
+  --bg: #f3f5f9;
+  --panel: #ffffff;
+  --line: #d7dfeb;
+  --text: #1d2a3a;
+  --muted: #5f6d7d;
+  --primary: #1f4f8f;
+  --primary-dark: #173c6b;
+  --good: #1d7a4a;
+  --bad: #b03a3a;
+  --shadow: 0 8px 20px rgba(15, 34, 62, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.layout {
+  width: min(1250px, 94vw);
+  margin: 24px auto;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.menu {
+  padding: 18px;
+  position: sticky;
+  top: 16px;
+  height: fit-content;
+}
+
+.menu h1 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+label { display: block; margin-bottom: 6px; font-weight: 600; }
+
+select,
+input,
+button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  font: inherit;
+}
+
+button {
+  margin-top: 8px;
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  cursor: pointer;
+}
+
+button:hover { background: var(--primary-dark); }
+
+.stats {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  background: #eff3f9;
+}
+
+.stats p { margin: 6px 0; color: var(--muted); }
+.stats strong { color: var(--text); }
+
+.content { padding: 18px; }
+
+.section {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.section + .section { margin-top: 14px; }
+
+.section h2 { margin: 0 0 10px; font-size: 1.1rem; }
+
+.theory-list { margin: 0; padding-left: 20px; line-height: 1.55; }
+
+.progress { margin-top: 10px; height: 10px; border-radius: 99px; background: #e0e7f2; overflow: hidden; }
+.progress-bar { height: 100%; width: 0%; background: var(--primary); }
+
+.exercise {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.exercise h3 { margin: 0 0 8px; font-size: 1rem; }
+.exercise p { margin: 0 0 8px; line-height: 1.45; }
+.feedback { margin-top: 8px; font-weight: 600; min-height: 18px; }
+.good { color: var(--good); }
+.bad { color: var(--bad); }
+
+.inline-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; }
+  .menu { position: static; }
+}

@@ -4,436 +4,62 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>English Tenses Trainer</title>
-    <style>
-      :root {
-        --bg: #f4f6fa;
-        --surface: #ffffff;
-        --surface-alt: #eef2f8;
-        --text: #1d2a3a;
-        --muted: #5c6b7b;
-        --primary: #1f4f8f;
-        --primary-strong: #173c6b;
-        --success: #1f7a4d;
-        --danger: #b03a3a;
-        --border: #d6deea;
-        --shadow: 0 8px 20px rgba(13, 38, 76, 0.08);
-      }
-
-      * { box-sizing: border-box; }
-
-      body {
-        margin: 0;
-        font-family: "Segoe UI", Arial, sans-serif;
-        color: var(--text);
-        background: var(--bg);
-      }
-
-      .layout {
-        width: min(1240px, 94vw);
-        margin: 24px auto;
-        display: grid;
-        grid-template-columns: 300px 1fr;
-        gap: 18px;
-      }
-
-      .panel {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        box-shadow: var(--shadow);
-      }
-
-      .menu {
-        padding: 18px;
-        position: sticky;
-        top: 20px;
-        height: fit-content;
-      }
-
-      h1 {
-        font-size: 1.35rem;
-        margin: 0 0 8px;
-      }
-
-      .subtitle {
-        margin: 0 0 14px;
-        color: var(--muted);
-        line-height: 1.45;
-      }
-
-      .menu select,
-      .menu button,
-      .exercise select,
-      .exercise button {
-        width: 100%;
-        font: inherit;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-      }
-
-      .menu select,
-      .exercise select {
-        padding: 10px;
-        background: #fff;
-      }
-
-      .menu button,
-      .exercise button {
-        padding: 10px 12px;
-        cursor: pointer;
-      }
-
-      .menu button {
-        margin-top: 10px;
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
-      }
-
-      .menu button:hover,
-      .exercise .check-btn:hover {
-        background: var(--primary-strong);
-      }
-
-      .stats {
-        margin-top: 14px;
-        background: var(--surface-alt);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 12px;
-      }
-
-      .stats p {
-        margin: 6px 0;
-        color: var(--muted);
-      }
-
-      .stats strong { color: var(--text); }
-
-      .content {
-        padding: 18px;
-      }
-
-      .section {
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 16px;
-        background: #fff;
-      }
-
-      .section + .section { margin-top: 14px; }
-
-      .section h2 {
-        margin: 0 0 10px;
-        font-size: 1.15rem;
-      }
-
-      .theory-list {
-        margin: 0;
-        padding-left: 20px;
-        line-height: 1.55;
-      }
-
-      .progress {
-        margin-top: 10px;
-        height: 10px;
-        border-radius: 999px;
-        background: #dde5f1;
-        overflow: hidden;
-      }
-
-      .progress-bar {
-        height: 100%;
-        background: var(--primary);
-        width: 0%;
-      }
-
-      .exercise {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 12px;
-        margin-top: 10px;
-      }
-
-      .exercise h3 {
-        margin: 0 0 8px;
-        font-size: 1rem;
-      }
-
-      .exercise p {
-        margin: 0 0 10px;
-        line-height: 1.5;
-      }
-
-      .exercise .check-btn {
-        margin-top: 8px;
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
-      }
-
-      .feedback {
-        margin-top: 8px;
-        min-height: 18px;
-        font-weight: 600;
-      }
-
-      .good { color: var(--success); }
-      .bad { color: var(--danger); }
-
-      @media (max-width: 940px) {
-        .layout {
-          grid-template-columns: 1fr;
-        }
-
-        .menu {
-          position: static;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
     <main class="layout">
       <aside class="panel menu">
         <h1>English Tenses Trainer</h1>
         <p class="subtitle">
-          Выберите одно из 12 времён, изучите теорию и выполните 30 практических примеров.
+          База заданий вынесена в отдельный файл <code>data/examples.js</code>, чтобы вы могли
+          легко менять примеры без поиска в <code>index.html</code>.
         </p>
-        <label for="tenseSelect"><strong>Главное меню: выбор времени</strong></label>
+
+        <label for="tenseSelect">Главное меню: выберите время</label>
         <select id="tenseSelect"></select>
-        <button id="loadTenseBtn" type="button">Открыть выбранное время</button>
+
+        <div class="inline-group">
+          <div>
+            <label for="modeSelect">Режим</label>
+            <select id="modeSelect">
+              <option value="choice">Выбор ответа</option>
+              <option value="translate">Translate (RU → EN)</option>
+            </select>
+          </div>
+          <div>
+            <label for="checkModeSelect">Проверка</label>
+            <select id="checkModeSelect">
+              <option value="strict">Строгая</option>
+              <option value="letters">По буквам</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="loadBtn" type="button">Загрузить курс</button>
 
         <section class="stats" aria-live="polite">
           <p><strong>Успешно:</strong> <span id="successPct">0%</span></p>
           <p><strong>Неверно:</strong> <span id="failurePct">0%</span></p>
           <p><strong>Попытки:</strong> <span id="attempts">0</span></p>
-          <p><strong>Осталось примеров:</strong> <span id="remaining">30</span></p>
+          <p><strong>Осталось:</strong> <span id="remaining">30</span></p>
         </section>
       </aside>
 
       <section class="panel content">
-        <article class="section" id="theorySection">
+        <article class="section">
           <h2>Теория</h2>
-          <ul class="theory-list" id="theoryList"></ul>
+          <ul id="theoryList" class="theory-list"></ul>
         </article>
 
         <article class="section">
           <h2>Практика (30 примеров)</h2>
           <p id="practiceIntro"></p>
-          <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
           <div id="practiceContainer"></div>
         </article>
       </section>
     </main>
 
-    <script>
-      const tenses = [
-        { id: "present_simple", name: "Present Simple", rule: "Факты, расписания, привычки.", marker: "usually, often, every day", formula: "V1 / V1+s, do/does" },
-        { id: "present_continuous", name: "Present Continuous", rule: "Действие в момент речи, временная ситуация.", marker: "now, at the moment", formula: "am/is/are + V-ing" },
-        { id: "present_perfect", name: "Present Perfect", rule: "Результат к настоящему моменту, опыт.", marker: "already, yet, just, ever, never", formula: "have/has + V3" },
-        { id: "present_perfect_continuous", name: "Present Perfect Continuous", rule: "Длительность действия до настоящего момента.", marker: "for, since, all day", formula: "have/has been + V-ing" },
-        { id: "past_simple", name: "Past Simple", rule: "Завершённое действие в прошлом.", marker: "yesterday, last week, ago", formula: "V2 / did" },
-        { id: "past_continuous", name: "Past Continuous", rule: "Процесс в конкретный момент в прошлом.", marker: "at 5 p.m. yesterday, while", formula: "was/were + V-ing" },
-        { id: "past_perfect", name: "Past Perfect", rule: "Действие, завершившееся до другого момента в прошлом.", marker: "before, by the time", formula: "had + V3" },
-        { id: "past_perfect_continuous", name: "Past Perfect Continuous", rule: "Длительность до момента в прошлом.", marker: "for, since, before", formula: "had been + V-ing" },
-        { id: "future_simple", name: "Future Simple", rule: "Прогноз, обещание, решение в момент речи.", marker: "tomorrow, next year, I think", formula: "will + V1" },
-        { id: "future_continuous", name: "Future Continuous", rule: "Процесс в определённый момент в будущем.", marker: "this time tomorrow", formula: "will be + V-ing" },
-        { id: "future_perfect", name: "Future Perfect", rule: "Действие завершится к определённому моменту в будущем.", marker: "by, by the time", formula: "will have + V3" },
-        { id: "future_perfect_continuous", name: "Future Perfect Continuous", rule: "Длительность до момента в будущем.", marker: "for, by", formula: "will have been + V-ing" }
-      ];
-
-      const taskTemplates = {
-        present_simple: [
-          ["She usually ___ to work by bus.", "goes"], ["They ___ English every Monday.", "study"], ["My brother ___ coffee in the morning.", "drinks"],
-          ["The school ___ at 8 a.m.", "opens"], ["I always ___ my homework on time.", "do"]
-        ],
-        present_continuous: [
-          ["I ___ a report now.", "am writing"], ["They ___ in the gym at the moment.", "are training"], ["She ___ to the principal now.", "is talking"],
-          ["We ___ dinner right now.", "are cooking"], ["He ___ an email now.", "is sending"]
-        ],
-        present_perfect: [
-          ["She ___ her project already.", "has finished"], ["I ___ this film before.", "have seen"], ["They ___ to London twice.", "have been"],
-          ["He ___ his keys.", "has lost"], ["We ___ just ___ lunch.", "have had"]
-        ],
-        present_perfect_continuous: [
-          ["I ___ for this exam since morning.", "have been studying"], ["She ___ here for two hours.", "has been waiting"], ["They ___ tennis all afternoon.", "have been playing"],
-          ["He ___ on this task since 9 o'clock.", "has been working"], ["We ___ English for three years.", "have been learning"]
-        ],
-        past_simple: [
-          ["I ___ my teacher yesterday.", "met"], ["They ___ to Paris last year.", "went"], ["She ___ her room yesterday evening.", "cleaned"],
-          ["He ___ me two days ago.", "called"], ["We ___ an interesting lesson last Friday.", "had"]
-        ],
-        past_continuous: [
-          ["I ___ when you called.", "was reading"], ["They ___ football at 6 p.m. yesterday.", "were playing"], ["She ___ dinner while he was working.", "was cooking"],
-          ["We ___ TV when the lights went out.", "were watching"], ["He ___ to music all evening.", "was listening"]
-        ],
-        past_perfect: [
-          ["She ___ before the lesson started.", "had arrived"], ["I ___ my homework before I went out.", "had finished"], ["They ___ the room by 5 p.m.", "had left"],
-          ["He ___ the book before the exam.", "had read"], ["We ___ dinner before guests came.", "had cooked"]
-        ],
-        past_perfect_continuous: [
-          ["I ___ for an hour before class began.", "had been waiting"], ["She ___ there since noon before he came.", "had been sitting"], ["They ___ all day before the meeting.", "had been working"],
-          ["He ___ English for years before he moved.", "had been studying"], ["We ___ for 30 minutes before the bus arrived.", "had been walking"]
-        ],
-        future_simple: [
-          ["I ___ you tomorrow.", "will call"], ["She ___ the report next week.", "will send"], ["They ___ us later.", "will help"],
-          ["We ___ this task soon.", "will finish"], ["He ___ it, I promise.", "will do"]
-        ],
-        future_continuous: [
-          ["This time tomorrow, I ___ to school.", "will be going"], ["At 8 p.m., they ___ dinner.", "will be having"], ["She ___ at 10 a.m. tomorrow.", "will be working"],
-          ["We ___ on the train at noon.", "will be travelling"], ["He ___ in the exam hall at 9.", "will be sitting"]
-        ],
-        future_perfect: [
-          ["By 6 p.m., I ___ this essay.", "will have finished"], ["She ___ the task by Monday.", "will have completed"], ["They ___ the project by June.", "will have delivered"],
-          ["We ___ all topics by the exam.", "will have revised"], ["He ___ home by 9 o'clock.", "will have returned"]
-        ],
-        future_perfect_continuous: [
-          ["By May, I ___ here for 5 years.", "will have been working"], ["She ___ English for 10 years by next summer.", "will have been studying"], ["They ___ for hours by the time we arrive.", "will have been waiting"],
-          ["We ___ all day by evening.", "will have been travelling"], ["He ___ for two hours by noon.", "will have been training"]
-        ]
-      };
-
-      const tenseSelect = document.getElementById("tenseSelect");
-      const loadTenseBtn = document.getElementById("loadTenseBtn");
-      const theoryList = document.getElementById("theoryList");
-      const practiceContainer = document.getElementById("practiceContainer");
-      const practiceIntro = document.getElementById("practiceIntro");
-      const successPct = document.getElementById("successPct");
-      const failurePct = document.getElementById("failurePct");
-      const attemptsEl = document.getElementById("attempts");
-      const remainingEl = document.getElementById("remaining");
-      const progressBar = document.getElementById("progressBar");
-
-      let state = { currentTenseId: tenses[0].id, attempts: 0, success: 0, failure: 0, done: 0 };
-
-      function buildThirty(tenseId) {
-        const base = taskTemplates[tenseId];
-        const result = [];
-        for (let i = 0; i < 30; i++) {
-          const [sentence, answer] = base[i % base.length];
-          const displayIndex = i + 1;
-          result.push({ sentence: `${displayIndex}. ${sentence}`, answer });
-        }
-        return result;
-      }
-
-      function renderStats() {
-        attemptsEl.textContent = state.attempts;
-        remainingEl.textContent = 30 - state.done;
-        const ok = state.attempts ? Math.round((state.success / state.attempts) * 100) : 0;
-        const bad = state.attempts ? 100 - ok : 0;
-        successPct.textContent = `${ok}%`;
-        failurePct.textContent = `${bad}%`;
-        progressBar.style.width = `${(state.done / 30) * 100}%`;
-      }
-
-      function renderTheory(tense) {
-        theoryList.innerHTML = `
-          <li><strong>Время:</strong> ${tense.name}</li>
-          <li><strong>Когда используется:</strong> ${tense.rule}</li>
-          <li><strong>Маркеры:</strong> ${tense.marker}</li>
-          <li><strong>Формула:</strong> ${tense.formula}</li>
-        `;
-      }
-
-      function evaluateAnswer(input, correct) {
-        return input.trim().toLowerCase() === correct.trim().toLowerCase();
-      }
-
-      function renderPractice(tense) {
-        const tasks = buildThirty(tense.id);
-        practiceIntro.textContent = `Вы выбрали: ${tense.name}. Выполните все 30 примеров.`;
-        practiceContainer.innerHTML = "";
-        state.attempts = 0;
-        state.success = 0;
-        state.failure = 0;
-        state.done = 0;
-        renderStats();
-
-        tasks.forEach((task, index) => {
-          const card = document.createElement("div");
-          card.className = "exercise";
-          card.innerHTML = `
-            <h3>Пример ${index + 1}</h3>
-            <p>${task.sentence}</p>
-            <select>
-              <option value="">Выберите вариант</option>
-              <option value="${task.answer}">${task.answer}</option>
-              <option value="do">do</option>
-              <option value="did">did</option>
-              <option value="is">is</option>
-              <option value="are">are</option>
-              <option value="was">was</option>
-              <option value="were">were</option>
-              <option value="will">will</option>
-              <option value="have">have</option>
-              <option value="has">has</option>
-              <option value="had">had</option>
-            </select>
-            <button type="button" class="check-btn">Проверить</button>
-            <div class="feedback"></div>
-          `;
-
-          const select = card.querySelector("select");
-          const button = card.querySelector(".check-btn");
-          const feedback = card.querySelector(".feedback");
-          let checked = false;
-
-          button.addEventListener("click", () => {
-            if (checked) return;
-            if (!select.value) {
-              feedback.textContent = "Выберите ответ перед проверкой.";
-              feedback.className = "feedback bad";
-              return;
-            }
-
-            checked = true;
-            button.disabled = true;
-            select.disabled = true;
-            state.attempts += 1;
-            state.done += 1;
-
-            if (evaluateAnswer(select.value, task.answer)) {
-              state.success += 1;
-              feedback.textContent = "Хорошо. Ответ верный.";
-              feedback.className = "feedback good";
-            } else {
-              state.failure += 1;
-              feedback.textContent = `Плохо. Правильно: ${task.answer}.`;
-              feedback.className = "feedback bad";
-            }
-
-            renderStats();
-          });
-
-          practiceContainer.appendChild(card);
-        });
-      }
-
-      function init() {
-        tenses.forEach((tense) => {
-          const option = document.createElement("option");
-          option.value = tense.id;
-          option.textContent = tense.name;
-          tenseSelect.appendChild(option);
-        });
-
-        const initial = tenses[0];
-        renderTheory(initial);
-        renderPractice(initial);
-
-        loadTenseBtn.addEventListener("click", () => {
-          const selected = tenses.find((t) => t.id === tenseSelect.value);
-          if (!selected) return;
-          state.currentTenseId = selected.id;
-          renderTheory(selected);
-          renderPractice(selected);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-      }
-
-      init();
-    </script>
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>
