@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Tenses Trainer</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <aside class="panel menu">
+        <h1>English Tenses Trainer</h1>
+        <p class="subtitle">
+          База заданий вынесена в отдельный файл <code>data/examples.js</code>, чтобы вы могли
+          легко менять примеры без поиска в <code>index.html</code>.
+        </p>
 
+        <label for="tenseSelect">Главное меню: выберите время</label>
+        <select id="tenseSelect"></select>
+
+        <div class="inline-group">
+          <div>
+            <label for="modeSelect">Режим</label>
+            <select id="modeSelect">
+              <option value="choice">Выбор ответа</option>
+              <option value="translate">Translate (RU → EN)</option>
+            </select>
+          </div>
+          <div>
+            <label for="checkModeSelect">Проверка</label>
+            <select id="checkModeSelect">
+              <option value="strict">Строгая</option>
+              <option value="letters">По буквам</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="loadBtn" type="button">Загрузить курс</button>
+
+        <section class="stats" aria-live="polite">
+          <p><strong>Успешно:</strong> <span id="successPct">0%</span></p>
+          <p><strong>Неверно:</strong> <span id="failurePct">0%</span></p>
+          <p><strong>Попытки:</strong> <span id="attempts">0</span></p>
+          <p><strong>Осталось:</strong> <span id="remaining">30</span></p>
+        </section>
+      </aside>
+
+      <section class="panel content">
+        <article class="section">
+          <h2>Теория</h2>
+          <ul id="theoryList" class="theory-list"></ul>
+        </article>
+
+        <article class="section">
+          <h2>Практика (30 примеров)</h2>
+          <p id="practiceIntro"></p>
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+          <div id="practiceContainer"></div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
