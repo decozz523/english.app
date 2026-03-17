@@ -1,1 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Time Garden 🌸</title>
+    <style>
+      :root {
+        --bg: #fff7fb;
+        --card: #ffffff;
+        --text: #2c2540;
+        --accent: #ff7fb3;
+        --accent-2: #8a7dff;
+        --ok: #2e9b62;
+        --err: #d64556;
+        --shadow: 0 10px 30px rgba(138, 125, 255, 0.15);
+      }
 
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Inter", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top left, #ffe6f2, transparent 40%),
+          radial-gradient(circle at top right, #e8ecff, transparent 42%), var(--bg);
+        min-height: 100vh;
+      }
+
+      .container {
+        width: min(1100px, 92vw);
+        margin: 0 auto;
+        padding: 24px 0 64px;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, #fff, #fff5fb);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        padding: 24px;
+        margin-top: 16px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 12px;
+      }
+
+      h1 {
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+      }
+
+      .hero p {
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      .tag {
+        display: inline-block;
+        background: #ffe2f0;
+        color: #8b3f62;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .card h3 {
+        font-size: 1.06rem;
+      }
+
+      .card p {
+        margin: 8px 0;
+      }
+
+      .theory-list {
+        margin: 8px 0 0;
+        padding-left: 20px;
+        line-height: 1.55;
+      }
+
+      .section-title {
+        margin-top: 28px;
+        font-size: 1.5rem;
+      }
+
+      .practice {
+        margin-top: 12px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .exercise {
+        background: #fff;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        border: 2px solid transparent;
+      }
+
+      .exercise.correct {
+        border-color: #8be7bb;
+      }
+
+      .exercise.incorrect {
+        border-color: #ffb0be;
+      }
+
+      .sentence {
+        font-size: 1.06rem;
+        margin: 6px 0 12px;
+      }
+
+      select,
+      button {
+        font: inherit;
+      }
+
+      select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #d4cfee;
+        margin-bottom: 10px;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: 0.2s transform ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      .check {
+        background: var(--accent-2);
+        color: white;
+      }
+
+      .next {
+        background: #f2f0ff;
+        color: #4c41b9;
+      }
+
+      .message {
+        margin-top: 8px;
+        min-height: 20px;
+        font-weight: 600;
+      }
+
+      .ok {
+        color: var(--ok);
+      }
+
+      .err {
+        color: var(--err);
+      }
+
+      .score {
+        margin-top: 18px;
+        background: #fff;
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .tip {
+        font-size: 0.95rem;
+        color: #584b7f;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 24px;
+        color: #6d6494;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero">
+        <span class="tag">Для учителя и учеников ✨</span>
+        <h1>English Time Garden — времена английского легко и с практикой</h1>
+        <p>
+          Этот мини-сайт сделан так, чтобы ученики <strong>сначала увидели простую теорию</strong>,
+          а затем получили <strong>много практики</strong>. Можно использовать на уроке с проектором,
+          на телефоне или как домашний тренажёр.
+        </p>
+      </section>
+
+      <h2 class="section-title">🌷 Короткая теория</h2>
+      <section class="grid" id="theory"></section>
+
+      <h2 class="section-title">🧠 Практика: выбери правильное время</h2>
+      <p class="tip">
+        Нажимайте «Проверить», чтобы получить обратную связь. В каждом блоке можно открыть
+        следующее задание кнопкой «Следующий пример».
+      </p>
+      <section class="practice" id="practice"></section>
+
+      <section class="score">
+        <div><strong>Верно:</strong> <span id="correctCount">0</span></div>
+        <div><strong>Ошибки:</strong> <span id="wrongCount">0</span></div>
+        <div><strong>Всего попыток:</strong> <span id="attemptsCount">0</span></div>
+      </section>
+
+      <footer>Сделано с заботой 💖 — можно дополнять своими предложениями и темами.</footer>
+    </main>
+
+    <script>
+      const tenses = [
+        {
+          name: "Present Simple",
+          use: "Регулярные действия, факты, привычки.",
+          signal: "usually, often, every day",
+          formula: "I/You/We/They play. He/She plays.",
+        },
+        {
+          name: "Present Continuous",
+          use: "Действие происходит прямо сейчас.",
+          signal: "now, at the moment",
+          formula: "am/is/are + verb-ing",
+        },
+        {
+          name: "Past Simple",
+          use: "Завершённое действие в прошлом.",
+          signal: "yesterday, last week, in 2020",
+          formula: "V2 / did",
+        },
+        {
+          name: "Future Simple",
+          use: "Спонтанное решение, прогноз, обещание.",
+          signal: "tomorrow, next year, I think",
+          formula: "will + verb",
+        },
+      ];
+
+      const tasks = [
+        {
+          sentence: "She ___ to school every day.",
+          answer: "Present Simple",
+          options: ["Past Simple", "Present Simple", "Present Continuous", "Future Simple"],
+          hint: "Слово every day показывает привычку.",
+        },
+        {
+          sentence: "Look! They ___ football now.",
+          answer: "Present Continuous",
+          options: ["Future Simple", "Present Continuous", "Past Simple", "Present Simple"],
+          hint: "Слово now = действие в момент речи.",
+        },
+        {
+          sentence: "I ___ my grandma yesterday.",
+          answer: "Past Simple",
+          options: ["Past Simple", "Present Simple", "Future Simple", "Present Continuous"],
+          hint: "Yesterday — явный маркер прошлого.",
+        },
+        {
+          sentence: "Don’t worry, I ___ help you.",
+          answer: "Future Simple",
+          options: ["Present Simple", "Future Simple", "Present Continuous", "Past Simple"],
+          hint: "Спонтанное решение: 'I will help'.",
+        },
+        {
+          sentence: "We usually ___ dinner at 7 p.m.",
+          answer: "Present Simple",
+          options: ["Past Simple", "Present Continuous", "Present Simple", "Future Simple"],
+          hint: "Usually указывает на привычное действие.",
+        },
+        {
+          sentence: "He ___ a shower at the moment.",
+          answer: "Present Continuous",
+          options: ["Present Continuous", "Future Simple", "Past Simple", "Present Simple"],
+          hint: "At the moment — сейчас.",
+        },
+        {
+          sentence: "They ___ to London last summer.",
+          answer: "Past Simple",
+          options: ["Future Simple", "Past Simple", "Present Simple", "Present Continuous"],
+          hint: "Last summer — прошедшее время.",
+        },
+        {
+          sentence: "I think it ___ rain tomorrow.",
+          answer: "Future Simple",
+          options: ["Present Simple", "Future Simple", "Past Simple", "Present Continuous"],
+          hint: "Прогноз + tomorrow = Future Simple.",
+        },
+      ];
+
+      const theoryEl = document.getElementById("theory");
+      const practiceEl = document.getElementById("practice");
+
+      let score = { correct: 0, wrong: 0, attempts: 0 };
+
+      const updateScore = () => {
+        document.getElementById("correctCount").textContent = score.correct;
+        document.getElementById("wrongCount").textContent = score.wrong;
+        document.getElementById("attemptsCount").textContent = score.attempts;
+      };
+
+      tenses.forEach((tense) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${tense.name}</h3>
+          <ul class="theory-list">
+            <li><strong>Когда:</strong> ${tense.use}</li>
+            <li><strong>Маркер:</strong> ${tense.signal}</li>
+            <li><strong>Формула:</strong> ${tense.formula}</li>
+          </ul>
+        `;
+        theoryEl.appendChild(card);
+      });
+
+      function buildExercise(taskIndex) {
+        const task = tasks[taskIndex];
+        const wrapper = document.createElement("article");
+        wrapper.className = "exercise";
+        wrapper.dataset.index = taskIndex;
+
+        wrapper.innerHTML = `
+          <h3>Задание ${taskIndex + 1}</h3>
+          <p class="sentence">${task.sentence}</p>
+          <select>
+            <option value="">-- Выберите время --</option>
+            ${task.options.map((o) => `<option value="${o}">${o}</option>`).join("")}
+          </select>
+          <div class="buttons">
+            <button class="check">Проверить</button>
+            <button class="next" type="button">Следующий пример</button>
+          </div>
+          <p class="message"></p>
+        `;
+
+        const select = wrapper.querySelector("select");
+        const checkBtn = wrapper.querySelector(".check");
+        const nextBtn = wrapper.querySelector(".next");
+        const message = wrapper.querySelector(".message");
+
+        checkBtn.addEventListener("click", () => {
+          const selected = select.value;
+
+          if (!selected) {
+            message.textContent = "Сначала выберите вариант 🙂";
+            message.className = "message err";
+            return;
+          }
+
+          score.attempts += 1;
+          if (selected === task.answer) {
+            score.correct += 1;
+            message.textContent = `Верно! ✅ ${task.hint}`;
+            message.className = "message ok";
+            wrapper.classList.add("correct");
+            wrapper.classList.remove("incorrect");
+          } else {
+            score.wrong += 1;
+            message.textContent = `Пока нет. Правильный ответ: ${task.answer}. ${task.hint}`;
+            message.className = "message err";
+            wrapper.classList.add("incorrect");
+            wrapper.classList.remove("correct");
+          }
+
+          updateScore();
+        });
+
+        nextBtn.addEventListener("click", () => {
+          const nextIndex = (Number(wrapper.dataset.index) + 1) % tasks.length;
+          const newExercise = buildExercise(nextIndex);
+          wrapper.replaceWith(newExercise);
+        });
+
+        return wrapper;
+      }
+
+      for (let i = 0; i < 4; i++) {
+        practiceEl.appendChild(buildExercise(i));
+      }
+
+      updateScore();
+    </script>
+  </body>
+</html>
