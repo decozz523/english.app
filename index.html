@@ -10,22 +10,31 @@
     <main class="layout">
       <aside class="panel menu">
         <h1>English Tenses Trainer</h1>
-        <p class="subtitle">
-          База заданий вынесена в отдельный файл <code>data/examples.js</code>, чтобы вы могли
-          легко менять примеры без поиска в <code>index.html</code>.
-        </p>
+        <p class="subtitle">Современный тренажёр: уровни, типы заданий, подсказки, объяснение ошибок и геймификация.</p>
 
-        <label for="tenseSelect">Главное меню: выберите время</label>
+        <label for="tenseSelect">Время</label>
         <select id="tenseSelect"></select>
 
         <div class="inline-group">
           <div>
-            <label for="modeSelect">Режим</label>
-            <select id="modeSelect">
-              <option value="choice">Выбор ответа</option>
-              <option value="translate">Translate (RU → EN)</option>
+            <label for="levelSelect">Уровень</label>
+            <select id="levelSelect">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
             </select>
           </div>
+          <div>
+            <label for="taskTypeSelect">Тип задания</label>
+            <select id="taskTypeSelect">
+              <option value="choice">Multiple choice</option>
+              <option value="fill">Вписать слово</option>
+              <option value="compose">Составить предложение</option>
+              <option value="random">Random: слова → угадай время</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="inline-group">
           <div>
             <label for="checkModeSelect">Проверка</label>
             <select id="checkModeSelect">
@@ -33,15 +42,19 @@
               <option value="letters">По буквам</option>
             </select>
           </div>
+          <div class="actions">
+            <button id="loadBtn" type="button">Новая сессия</button>
+            <button id="resetBtn" type="button" class="ghost">Сбросить прогресс</button>
+          </div>
         </div>
-
-        <button id="loadBtn" type="button">Загрузить курс</button>
 
         <section class="stats" aria-live="polite">
           <p><strong>Успешно:</strong> <span id="successPct">0%</span></p>
           <p><strong>Неверно:</strong> <span id="failurePct">0%</span></p>
           <p><strong>Попытки:</strong> <span id="attempts">0</span></p>
           <p><strong>Осталось:</strong> <span id="remaining">30</span></p>
+          <p><strong>Очки:</strong> <span id="points">0</span></p>
+          <p><strong>Streak:</strong> <span id="streak">0</span> (best: <span id="bestStreak">0</span>)</p>
         </section>
       </aside>
 
