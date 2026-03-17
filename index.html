@@ -1,1 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Tenses Trainer</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <aside class="panel menu">
+        <h1>English Tenses Trainer</h1>
+        <p class="subtitle">Современный тренажёр: уровни, типы заданий, подсказки, объяснение ошибок и геймификация.</p>
 
+        <label for="tenseSelect">Время</label>
+        <select id="tenseSelect"></select>
+
+        <div class="inline-group">
+          <div>
+            <label for="levelSelect">Уровень</label>
+            <select id="levelSelect">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+            </select>
+          </div>
+          <div>
+            <label for="taskTypeSelect">Тип задания</label>
+            <select id="taskTypeSelect">
+              <option value="choice">Multiple choice</option>
+              <option value="fill">Вписать слово</option>
+              <option value="compose">Составить предложение</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="inline-group">
+          <div>
+            <label for="checkModeSelect">Проверка</label>
+            <select id="checkModeSelect">
+              <option value="strict">Строгая</option>
+              <option value="letters">По буквам</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button id="loadBtn" type="button">Новая сессия</button>
+            <button id="resetBtn" type="button" class="ghost">Сбросить прогресс</button>
+          </div>
+        </div>
+
+        <section class="stats" aria-live="polite">
+          <p><strong>Успешно:</strong> <span id="successPct">0%</span></p>
+          <p><strong>Неверно:</strong> <span id="failurePct">0%</span></p>
+          <p><strong>Попытки:</strong> <span id="attempts">0</span></p>
+          <p><strong>Осталось:</strong> <span id="remaining">30</span></p>
+          <p><strong>Очки:</strong> <span id="points">0</span></p>
+          <p><strong>Streak:</strong> <span id="streak">0</span> (best: <span id="bestStreak">0</span>)</p>
+        </section>
+      </aside>
+
+      <section class="panel content">
+        <article class="section">
+          <h2>Теория</h2>
+          <ul id="theoryList" class="theory-list"></ul>
+        </article>
+
+        <article class="section">
+          <h2>Практика (30 примеров)</h2>
+          <p id="practiceIntro"></p>
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+          <div id="practiceContainer"></div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
