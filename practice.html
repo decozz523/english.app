@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Tenses — Practice</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="topbar">
+      <div class="brand">⚡ English Tenses Lab</div>
+      <nav class="nav">
+        <a href="index.html">Главная</a>
+        <a class="active" href="practice.html">Практика</a>
+        <a href="theory.html">Теория</a>
+      </nav>
+    </header>
+
+    <section class="layout">
+      <aside class="panel">
+        <label for="tenseSelect">Время</label>
+        <select id="tenseSelect"></select>
+
+        <div class="inline-2">
+          <div>
+            <label for="levelSelect">Уровень</label>
+            <select id="levelSelect">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+            </select>
+          </div>
+          <div>
+            <label for="taskTypeSelect">Тип</label>
+            <select id="taskTypeSelect">
+              <option value="choice">Multiple choice</option>
+              <option value="fill">Fill</option>
+              <option value="compose">Compose</option>
+              <option value="random">Random</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="checkModeSelect">Проверка</label>
+        <select id="checkModeSelect">
+          <option value="strict">Строгая</option>
+          <option value="letters">По буквам</option>
+        </select>
+
+        <button id="loadBtn" type="button">Новая сессия</button>
+        <button id="resetBtn" type="button" class="ghost">Сбросить прогресс</button>
+
+        <section class="stats">
+          <p><strong>Успешно:</strong> <span id="successPct">0%</span></p>
+          <p><strong>Неверно:</strong> <span id="failurePct">0%</span></p>
+          <p><strong>Попытки:</strong> <span id="attempts">0</span></p>
+          <p><strong>Осталось:</strong> <span id="remaining">30</span></p>
+          <p><strong>Очки:</strong> <span id="points">0</span></p>
+          <p><strong>Streak:</strong> <span id="streak">0</span> / <span id="bestStreak">0</span></p>
+        </section>
+      </aside>
+
+      <section class="panel">
+        <h2>Практика (30 заданий)</h2>
+        <p id="practiceIntro"></p>
+        <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+
+        <article class="card">
+          <h3>Теория текущего времени</h3>
+          <ul id="theoryList" class="theory-list"></ul>
+        </article>
+
+        <div id="practiceContainer"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
