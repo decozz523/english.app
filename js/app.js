@@ -1,6 +1,6 @@
 import { TENSES } from "../data/examples.js";
 
-const STORAGE_KEY = "english_tenses_trainer_state_v2";
+const STORAGE_KEY = "english_tenses_trainer_state_v3";
 
 const tenseSelect = document.getElementById("tenseSelect");
 const levelSelect = document.getElementById("levelSelect");
@@ -37,6 +37,15 @@ const state = {
   tasks: []
 };
 
+const sentenceAddons = [
+  "at school",
+  "at home",
+  "with friends",
+  "in the evening",
+  "during the lesson",
+  "on weekdays"
+];
+
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
@@ -55,12 +64,7 @@ function clearState() {
 }
 
 function normalizeText(text) {
-  return text
-    .toLowerCase()
-    .replace(/[’`]/g, "'")
-    .replace(/[.,!?;:'"()]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return text.toLowerCase().replace(/[’`]/g, "'").replace(/[.,!?;:'"()]/g, "").replace(/\s+/g, " ").trim();
 }
 
 function expandContractions(text) {
@@ -74,10 +78,7 @@ function expandContractions(text) {
 }
 
 function withoutArticles(text) {
-  return text
-    .split(" ")
-    .filter((word) => !["a", "an", "the"].includes(word))
-    .join(" ");
+  return text.split(" ").filter((word) => !["a", "an", "the"].includes(word)).join(" ");
 }
 
 function lettersOnly(text) {
@@ -103,40 +104,37 @@ function checkAnswer(userInput, correctAnswer, checkMode, level) {
 
   if (checkMode === "strict") {
     if (normalizedUser === normalizedCorrect) return { ok: true, details: "Точное совпадение." };
-    if (withoutArticles(normalizedUser) === withoutArticles(normalizedCorrect)) {
-      return { ok: true, details: "Принято: разница только в артиклях." };
-    }
+    if (withoutArticles(normalizedUser) === withoutArticles(normalizedCorrect)) return { ok: true, details: "Принято: разница только в артиклях." };
     return { ok: false, details: "В строгом режиме нужен максимально точный ответ." };
   }
 
   const left = lettersOnly(withoutArticles(normalizedUser));
   const right = lettersOnly(withoutArticles(normalizedCorrect));
-  const distance = levenshtein(left, right);
-  const similarity = 1 - distance / (Math.max(left.length, right.length) || 1);
+  const similarity = 1 - levenshtein(left, right) / (Math.max(left.length, right.length) || 1);
   const threshold = level === "beginner" ? 0.74 : 0.82;
+  return { ok: similarity >= threshold, details: `Совпадение по буквам: ${(similarity * 100).toFixed(0)}% (порог ${Math.round(threshold * 100)}%).` };
+}
 
-  return {
-    ok: similarity >= threshold,
-    details: `Совпадение по буквам: ${(similarity * 100).toFixed(0)}% (порог ${Math.round(threshold * 100)}%).`
-  };
+function shuffle(list) {
+  const arr = [...list];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 function shuffleWords(sentence) {
-  const tokens = sentence.replace(/[.?!,]/g, "").split(" ");
-  for (let i = tokens.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [tokens[i], tokens[j]] = [tokens[j], tokens[i]];
-  }
-  return tokens;
+  return shuffle(sentence.replace(/[.?!,]/g, "").split(" "));
 }
 
 function baseTask(task, idx, tense) {
   return {
     ...task,
     idx,
-    tenseName: tense.name,
-    formula: tense.theory.formula,
-    markers: tense.theory.markers,
+    tenseName: tense?.name ?? "Random",
+    formula: tense?.theory?.formula ?? "Определите по маркерам и структуре",
+    markers: tense?.theory?.markers ?? "mixed markers",
     checked: false,
     ok: null,
     userAnswer: "",
@@ -145,29 +143,65 @@ function baseTask(task, idx, tense) {
   };
 }
 
+function diversifySentence(sentence, variant) {
+  if (variant === 0) return sentence;
+  const clean = sentence.replace(/\.$/, "");
+  const addon = sentenceAddons[(variant - 1) % sentenceAddons.length];
+  return `${clean} ${addon}.`;
+}
+
+function buildRandomPool() {
+  const pool = [];
+  TENSES.forEach((tense) => {
+    tense.translateSeeds.forEach((seed) => {
+      pool.push({
+        taskType: "random",
+        ru: "Случайные слова: определите нужное время и соберите английское предложение.",
+        answer: seed.answer,
+        words: shuffleWords(seed.answer),
+        tense
+      });
+    });
+  });
+  return shuffle(pool);
+}
+
 function buildTasks(tense, taskType) {
-  const source = taskType === "compose" ? tense.translateSeeds : tense.choiceSeeds;
   const tasks = [];
+
+  if (taskType === "random") {
+    const pool = buildRandomPool();
+    for (let i = 0; i < 30; i += 1) {
+      const item = pool[i % pool.length];
+      tasks.push(baseTask({ taskType, ru: item.ru, answer: item.answer, words: item.words }, i + 1, item.tense));
+    }
+    return tasks;
+  }
+
+  const source = taskType === "compose" ? tense.translateSeeds : tense.choiceSeeds;
   for (let i = 0; i < 30; i += 1) {
     const item = source[i % source.length];
+    const variant = Math.floor(i / source.length);
     const idx = i + 1;
 
     if (taskType === "choice") {
-      tasks.push(baseTask({ taskType, sentence: item.sentence, answer: item.answer, options: item.options }, idx, tense));
+      tasks.push(baseTask({ taskType, sentence: diversifySentence(item.sentence, variant), answer: item.answer, options: item.options }, idx, tense));
     } else if (taskType === "fill") {
-      tasks.push(baseTask({ taskType, sentence: item.sentence, answer: item.answer }, idx, tense));
+      tasks.push(baseTask({ taskType, sentence: diversifySentence(item.sentence, variant), answer: item.answer }, idx, tense));
     } else {
-      tasks.push(baseTask({ taskType, ru: item.ru, answer: item.answer, words: shuffleWords(item.answer) }, idx, tense));
+      const words = shuffleWords(item.answer);
+      tasks.push(baseTask({ taskType, ru: item.ru, answer: item.answer, words }, idx, tense));
     }
   }
+
   return tasks;
 }
 
 function taskHint(task) {
-  if (task.taskType === "compose") return `Подсказка: начните с подлежащего, затем временная форма (${task.formula}).`;
-  if (task.sentence && task.sentence.includes("now")) return `Подсказка: есть маркер "now", чаще всего это Continuous.`;
-  if (task.sentence && task.sentence.includes("yesterday")) return `Подсказка: "yesterday" обычно указывает на Past Simple.`;
-  return `Подсказка: ориентируйтесь на формулу ${task.formula}.`;
+  if (task.taskType === "compose" || task.taskType === "random") return `Подсказка: соберите структуру по формуле ${task.formula}.`;
+  if (task.sentence?.includes("now")) return "Подсказка: маркер now часто указывает на Continuous.";
+  if (task.sentence?.includes("yesterday")) return "Подсказка: yesterday обычно указывает на Past Simple.";
+  return `Подсказка: ориентируйтесь на маркеры (${task.markers}).`;
 }
 
 function explainError(task, result) {
@@ -182,9 +216,8 @@ function updateStats() {
   bestStreakEl.textContent = String(state.bestStreak);
 
   const ok = state.attempts ? Math.round((state.success / state.attempts) * 100) : 0;
-  const bad = state.attempts ? 100 - ok : 0;
   successPct.textContent = `${ok}%`;
-  failurePct.textContent = `${bad}%`;
+  failurePct.textContent = `${state.attempts ? 100 - ok : 0}%`;
   progressBar.style.width = `${(state.done / 30) * 100}%`;
 }
 
@@ -208,27 +241,14 @@ function renderTheory(tense) {
 function taskMarkup(task) {
   if (task.taskType === "choice") {
     const options = state.level === "beginner" ? task.options : [...task.options].sort();
-    return `
-      <p>${task.idx}. ${task.sentence}</p>
-      <select>
-        <option value="">Выберите ответ</option>
-        ${options.map((o) => `<option value="${o}">${o}</option>`).join("")}
-      </select>
-    `;
+    return `<p>${task.idx}. ${task.sentence}</p><select><option value="">Выберите ответ</option>${options.map((o) => `<option value="${o}">${o}</option>`).join("")}</select>`;
   }
 
   if (task.taskType === "fill") {
-    return `
-      <p>${task.idx}. Впишите пропущенное: ${task.sentence}</p>
-      <input type="text" placeholder="Введите слово/фразу" />
-    `;
+    return `<p>${task.idx}. Впишите пропущенное: ${task.sentence}</p><input type="text" placeholder="Введите слово/фразу" />`;
   }
 
-  return `
-    <p>${task.idx}. Составьте предложение (RU → EN): <strong>${task.ru}</strong></p>
-    <div class="chips">${task.words.map((word) => `<span class="chip">${word}</span>`).join("")}</div>
-    <input type="text" placeholder="Соберите правильное предложение" />
-  `;
+  return `<p>${task.idx}. ${task.ru}</p><div class="chips">${task.words.map((word) => `<span class="chip">${word}</span>`).join("")}</div><input type="text" placeholder="Соберите предложение" />`;
 }
 
 function applyScore(isOk) {
@@ -249,10 +269,7 @@ function renderTaskCard(task, index) {
   card.innerHTML = `
     <h3>Пример ${task.idx}</h3>
     ${taskMarkup(task)}
-    <div class="inline-group">
-      <button type="button" class="check-btn">Проверить</button>
-      <button type="button" class="hint-btn ghost">Подсказка</button>
-    </div>
+    <div class="inline-group"><button type="button" class="check-btn">Проверить</button><button type="button" class="hint-btn ghost">Подсказка</button></div>
     <div class="hint ${task.hintVisible ? "visible" : ""}">${taskHint(task)}</div>
     <div class="feedback ${task.checked ? (task.ok ? "good" : "bad") : ""}">${task.feedbackText}</div>
   `;
@@ -290,9 +307,7 @@ function renderTaskCard(task, index) {
     state.tasks[index].checked = true;
     state.tasks[index].ok = ok;
     state.tasks[index].userAnswer = userInput;
-    state.tasks[index].feedbackText = ok
-      ? `✅ Верно. ${result.details}`
-      : `❌ Неверно. Правильный ответ: ${state.tasks[index].answer}.`;
+    state.tasks[index].feedbackText = ok ? `✅ Верно. ${result.details}` : `❌ Неверно. Правильный ответ: ${state.tasks[index].answer}.`;
 
     applyScore(ok);
     recalcFromTasks();
@@ -319,21 +334,18 @@ function renderTaskCard(task, index) {
 function renderTasks() {
   intro.textContent = `Уровень: ${state.level}. Тип: ${state.taskType}. Проверка: ${state.checkMode}.`;
   practiceContainer.innerHTML = "";
-  state.tasks.forEach((task, index) => {
-    practiceContainer.appendChild(renderTaskCard(task, index));
-  });
+  state.tasks.forEach((task, index) => practiceContainer.appendChild(renderTaskCard(task, index)));
   recalcFromTasks();
   updateStats();
 }
 
 function startSession() {
-  const tense = TENSES.find((t) => t.id === tenseSelect.value) ?? TENSES[0];
+  const selected = TENSES.find((t) => t.id === tenseSelect.value) ?? TENSES[0];
 
-  state.tenseId = tense.id;
+  state.tenseId = selected.id;
   state.level = levelSelect.value;
   state.taskType = taskTypeSelect.value;
   state.checkMode = checkModeSelect.value;
-
   state.attempts = 0;
   state.success = 0;
   state.failure = 0;
@@ -341,9 +353,9 @@ function startSession() {
   state.points = 0;
   state.streak = 0;
   state.bestStreak = 0;
-  state.tasks = buildTasks(tense, state.taskType);
+  state.tasks = buildTasks(selected, state.taskType);
 
-  renderTheory(tense);
+  renderTheory(selected);
   renderTasks();
   saveState();
 }
@@ -353,33 +365,31 @@ function restoreSession(saved) {
     ...state,
     ...saved,
     level: saved.level === "intermediate" ? "intermediate" : "beginner",
-    taskType: ["choice", "fill", "compose"].includes(saved.taskType) ? saved.taskType : "choice",
+    taskType: ["choice", "fill", "compose", "random"].includes(saved.taskType) ? saved.taskType : "choice",
     checkMode: saved.checkMode === "letters" ? "letters" : "strict"
   });
 
-  const tense = TENSES.find((t) => t.id === state.tenseId) ?? TENSES[0];
-  const fallback = buildTasks(tense, state.taskType);
-  if (!Array.isArray(state.tasks) || state.tasks.length !== 30) {
-    state.tasks = fallback;
-  } else {
-    state.tasks = state.tasks.map((task, idx) => ({ ...fallback[idx], ...task }));
-  }
+  const selected = TENSES.find((t) => t.id === state.tenseId) ?? TENSES[0];
+  const fallback = buildTasks(selected, state.taskType);
+  state.tasks = Array.isArray(saved.tasks) && saved.tasks.length === 30
+    ? saved.tasks.map((task, idx) => ({ ...fallback[idx], ...task }))
+    : fallback;
 
-  tenseSelect.value = tense.id;
+  tenseSelect.value = selected.id;
   levelSelect.value = state.level;
   taskTypeSelect.value = state.taskType;
   checkModeSelect.value = state.checkMode;
 
-  renderTheory(tense);
+  renderTheory(selected);
   renderTasks();
 }
 
 function init() {
   TENSES.forEach((tense) => {
-    const opt = document.createElement("option");
-    opt.value = tense.id;
-    opt.textContent = tense.name;
-    tenseSelect.appendChild(opt);
+    const option = document.createElement("option");
+    option.value = tense.id;
+    option.textContent = tense.name;
+    tenseSelect.appendChild(option);
   });
 
   loadBtn.addEventListener("click", startSession);
